@@ -71,7 +71,10 @@ $("btnPost").onclick=async()=>{
   $("btnPost").disabled=true;$("msg").textContent="Uploading…";
   const r=await post("/post",{name:cur.name,caption:$("cap").value,privacy_level:$("priv").value,
     allow_comment:$("cmt").checked,allow_duet:$("duet").checked,allow_stitch:$("stitch").checked});
-  if(r.error){$("msg").textContent="Error: "+JSON.stringify(r.error);check();return}
+  if(r.error){const c=(r.error||{}).code||"";
+    $("msg").textContent=c.indexOf("unaudited")===0
+      ?"This app is not audited yet, so TikTok only allows posting with privacy \"Only me\" (and your account set to Private). Change the privacy and try again."
+      :"Error: "+JSON.stringify(r.error);check();return}
   $("msg").textContent="Uploaded. Processing on TikTok…";
   for(let i=0;i<60;i++){await new Promise(z=>setTimeout(z,3000));
     const s=await api("/publish_status?id="+encodeURIComponent(r.publish_id)),st=(s.data||{}).status;
